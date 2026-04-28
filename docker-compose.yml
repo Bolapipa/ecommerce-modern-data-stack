@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+  # Banco de dados principal do projeto
+  # Vai armazenar os dados brutos, tratados e modelados
+  postgres:
+    image: postgres:16
+    container_name: ecommerce_postgres
+    restart: always
+
+    # Carrega as variáveis do arquivo .env
+    env_file:
+      - .env
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      # Porta local 5432 apontando para a porta 5432 do container
+      - "5432:5432"
+
+    volumes:
+      # Guarda os dados do PostgreSQL mesmo se o container for reiniciado
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - ecommerce_network
+
+  # Ferramenta de dashboard
+  # Vai conectar no PostgreSQL para criar análises visuais
+  metabase:
+    image: metabase/metabase:latest
+    container_name: ecommerce_metabase
+    restart: always
+
+    ports:
+      # Acessar no navegador em http://localhost:3000
+      - "3000:3000"
+
+    volumes:
+      # Guarda configurações internas do Metabase
+      - metabase_data:/metabase-data
+
+    environment:
+      MB_DB_FILE: ${MB_DB_FILE}
+
+    depends_on:
+      - postgres
+
+    networks:
+      - ecommerce_network
+
+  # Orquestrador do pipeline
+  # Vai controlar a execução da ingestão e do dbt
+  dagster:
+    image: python:3.11-slim
+    container_name: ecommerce_dagster
+    restart: always
+
+    working_dir: /app
+
+    # Mantém o container rodando por enquanto
+    # Depois vamos trocar isso pelo comando do Dagster
+    command: tail -f /dev/null
+
+    env_file:
+      - .env
+
+    ports:
+      # Futuramente acessaremos o Dagster em http://localhost:3001
+      - "3001:3000"
+
+    volumes:
+      # Copia o projeto local para dentro do container
+      - .:/app
+
+    depends_on:
+      - postgres
+
+    networks:
+      - ecommerce_network
+
+# Volumes são áreas persistentes usados pelos containers
+volumes:
+  postgres_data:
+  metabase_data:
+
+    # Rede interna para os containers conversarem entre si
+networks:
+  ecommerce_network:
+    driver: bridge

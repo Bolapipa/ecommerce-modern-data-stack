@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Tabelas brutas carregadas no PostgreSQL a partir dos arquivos CSV gerados em Python."
+    schema: raw
+
+    tables:
+      - name: raw_customers
+        description: "Dados brutos de clientes fictícios do e-commerce."
+
+      - name: raw_products
+        description: "Dados brutos de produtos fictícios do e-commerce."
+
+      - name: raw_orders
+        description: "Dados brutos de pedidos fictícios do e-commerce."
+
+      - name: raw_order_items
+        description: "Dados brutos dos itens de cada pedido."
+
+      - name: raw_payments
+        description: "Dados brutos dos pagamentos dos pedidos."

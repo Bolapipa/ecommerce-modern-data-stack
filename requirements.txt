@@ -1,0 +1,23 @@
+# Biblioteca para criar e manipular dados em formato de tabela
+pandas==2.2.3
+
+# Biblioteca para gerar dados fictícios, como nomes, e-mails, datas e endereços
+faker==37.1.0
+
+# Biblioteca para conectar o Python ao PostgreSQL
+psycopg2-binary==2.9.10
+
+# Motor principal do dbt, usado para transformar dados com SQL
+dbt-core==1.9.4
+
+# Adaptador que permite o dbt se conectar ao PostgreSQL
+dbt-postgres==1.9.0
+
+# Orquestrador usado para controlar a execução do pipeline
+dagster==1.10.7
+
+# Interface web do Dagster, usada para visualizar e executar os pipelines
+dagster-webserver==1.10.7
+
+# Integração entre Dagster e dbt
+dagster-dbt==0.26.7

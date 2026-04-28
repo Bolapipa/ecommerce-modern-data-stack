@@ -1,0 +1,108 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Tabela staging de clientes com dados padronizados."
+    columns:
+      - name: customer_id
+        description: "Identificador único do cliente."
+        tests:
+          - not_null
+          - unique
+
+      - name: email
+        description: "E-mail do cliente padronizado em minúsculo."
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: "Tabela staging de produtos com dados padronizados."
+    columns:
+      - name: product_id
+        description: "Identificador único do produto."
+        tests:
+          - not_null
+          - unique
+
+      - name: price
+        description: "Preço do produto."
+        tests:
+          - not_null
+
+  - name: stg_orders
+    description: "Tabela staging de pedidos."
+    columns:
+      - name: order_id
+        description: "Identificador único do pedido."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Identificador do cliente relacionado ao pedido."
+        tests:
+          - not_null
+
+      - name: order_status
+        description: "Status padronizado do pedido."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['completed', 'cancelled', 'pending']
+
+  - name: stg_order_items
+    description: "Tabela staging de itens dos pedidos."
+    columns:
+      - name: order_item_id
+        description: "Identificador único do item do pedido."
+        tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: "Identificador do pedido."
+        tests:
+          - not_null
+
+      - name: product_id
+        description: "Identificador do produto."
+        tests:
+          - not_null
+
+      - name: quantity
+        description: "Quantidade comprada."
+        tests:
+          - not_null
+
+      - name: total_item_amount
+        description: "Valor total do item do pedido."
+        tests:
+          - not_null
+
+  - name: stg_payments
+    description: "Tabela staging de pagamentos."
+    columns:
+      - name: payment_id
+        description: "Identificador único do pagamento."
+        tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: "Identificador do pedido relacionado ao pagamento."
+        tests:
+          - not_null
+
+      - name: payment_method
+        description: "Método de pagamento."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['credit_card', 'pix', 'boleto', 'debit_card']
+
+      - name: payment_status
+        description: "Status do pagamento."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['paid', 'failed', 'refunded']

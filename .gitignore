@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Dagster
+.dagster/
+storage/
+
+# Metabase
+metabase-data/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Docker
+*.log
