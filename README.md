@@ -1,73 +1,207 @@
-# ecommerce-modern-data-stack
-Plataforma analítica local de e-commerce construída com Docker, PostgreSQL, dbt, Dagster e Metabase, demonstrando ingestão de dados, transformação SQL, modelagem dimensional, orquestração e visualização.
+# Ecommerce Modern Data Stack
 
+Projeto de Engenharia de Dados para demonstrar um pipeline analitico completo com:
+- ingestao em Python
+- armazenamento em PostgreSQL
+- transformacoes com dbt
+- orquestracao com Dagster
+- visualizacao no Metabase
 
-# E-commerce Modern Data Stack
+Repositorio remoto: https://github.com/Bolapipa/ecommerce-modern-data-stack
 
-Projeto de engenharia de dados que implementa uma plataforma analítica local para dados de e-commerce, utilizando Docker, PostgreSQL, dbt, Dagster e Metabase.
+## 1) Objetivo do projeto
 
-## Objetivo
+O pipeline gera dados ficticios de e-commerce, carrega na camada `raw`, aplica transformacoes em camadas (`staging`, `intermediate`, `marts`) e disponibiliza tabelas finais para analise.
 
-Construir um pipeline completo de dados, desde a ingestão em camada raw até a criação de modelos analíticos e dashboards.
+Fluxo de alto nivel:
 
-## Arquitetura
+```text
+Python (geracao + carga)
+        -> PostgreSQL (raw)
+        -> dbt (staging/intermediate/marts)
+        -> Metabase (dashboards)
+Dagster orquestra todo o fluxo
+```
 
-Python → PostgreSQL Raw → dbt Staging → dbt Intermediate → dbt Marts → Metabase
+## 2) Arquitetura
 
-## Stack
+Camadas de dados:
 
-- Python
-- PostgreSQL
-- dbt
-- Dagster
-- Docker
-- Metabase
-- GitHub Actions
+```text
+raw          dados brutos carregados dos CSVs
+staging      tipagem, limpeza e padronizacao
+intermediate joins e regras intermediarias
+marts        tabelas finais para BI
+```
 
-## Conceitos demonstrados
+Principais tabelas finais:
+- `marts.dim_customers`
+- `marts.dim_products`
+- `marts.fact_orders`
+- `marts.fact_order_items`
+- `marts.sales_by_category`
 
-- ETL/ELT
-- Data Modeling
-- Star Schema
-- Data Quality
-- Data Orchestration
-- Data Visualization
-- Containerization
-- CI/CD
+## 3) Estrutura de pastas
 
-## Project Screenshots
+```text
+.
+|-- ingestion/
+|   |-- generate_fake_data.py
+|   `-- load_raw_data.py
+|-- orchestration/dagster_project/
+|   |-- definitions.py
+|   `-- Dockerfile
+|-- dbt_ecommerce/ecommerce/
+|   |-- dbt_project.yml
+|   |-- profiles.yml
+|   `-- models/
+|-- dashboards/metabase/
+|-- docs/
+|-- docker-compose.yml
+`-- requirements.txt
+```
 
-### Metabase Dashboard
+## 4) Pre-requisitos
 
-The dashboard was built using the final marts created by dbt.
+- Docker Desktop
+- Docker Compose
+- Python 3.11+ (somente se for executar scripts fora do container)
 
-It includes:
-- Total revenue
-- Orders by status
-- Revenue by product category
+## 5) Variaveis de ambiente
 
-![Metabase Dashboard](dashboards/metabase/screenshots/dashboard_ecommerce.png)
+1. Copie o arquivo de exemplo:
 
----
+```bash
+cp .env.example .env
+```
 
-### dbt Lineage
+No Windows PowerShell:
 
-The dbt documentation shows the data lineage from raw sources to staging, intermediate and marts models.
+```powershell
+Copy-Item .env.example .env
+```
 
-![dbt Lineage](docs/dbt_lineage.png)
+2. Revise os valores no `.env`:
 
----
+```env
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=ecommerce
+POSTGRES_USER=ecommerce_user
+POSTGRES_PASSWORD=ecommerce_password
+MB_DB_FILE=/metabase-data/metabase.db
+DAGSTER_HOME=/opt/dagster/dagster_home
+```
 
-### Dagster Pipeline
+## 6) Subindo o ambiente com Docker
 
-Dagster orchestrates the full data pipeline, running data generation, raw ingestion, dbt transformations and dbt tests.
+```bash
+docker compose up -d --build
+```
 
-![Dagster Pipeline Success](docs/dagster_pipeline_success.png)
+Servicos:
+- PostgreSQL: `localhost:5432`
+- Metabase: `http://localhost:3000`
+- Dagster: `http://localhost:3001`
 
----
+Verifique status:
 
-### Dagster Asset Lineage
+```bash
+docker compose ps
+```
 
-The Dagster asset lineage shows the dependency flow between each pipeline step.
+## 7) Executando o pipeline no Dagster
 
-![Dagster Asset Lineage](docs/dagster_asset_lineage.png)
+1. Abra `http://localhost:3001`
+2. Materialize os assets na ordem (ou all assets):
+- `generate_fake_data`
+- `load_raw_data`
+- `dbt_run`
+- `dbt_test`
+- `pipeline_summary`
+
+Ao final, o arquivo `docs/pipeline_summary.txt` e gerado automaticamente.
+
+## 8) Execucao manual (sem Dagster)
+
+Se quiser rodar por etapas no seu ambiente Python local:
+
+```bash
+python ingestion/generate_fake_data.py
+python ingestion/load_raw_data.py
+```
+
+Depois rode dbt:
+
+```bash
+cd dbt_ecommerce/ecommerce
+dbt debug --profiles-dir .
+dbt run --profiles-dir .
+dbt test --profiles-dir .
+```
+
+## 9) dbt Docs (linhagem e documentacao)
+
+Dentro de `dbt_ecommerce/ecommerce`:
+
+```bash
+dbt docs generate --profiles-dir .
+dbt docs serve --port 8081 --profiles-dir .
+```
+
+Abra `http://localhost:8081`.
+
+## 10) Metabase (analise)
+
+1. Acesse `http://localhost:3000`
+2. Conecte no PostgreSQL com as credenciais do `.env`
+3. Explore tabelas no schema `marts`
+4. Monte perguntas e dashboards
+
+Screenshot de exemplo: `dashboards/metabase/screenshots/dashboard_ecommerce.png` (se aplicavel no seu ambiente)
+
+## 11) Evidencias visuais ja presentes no projeto
+
+- [Dagster pipeline sucesso](docs/dagster_pipeline_success.png)
+- [Dagster lineage](docs/dagster_asset_lineage.png)
+- [dbt lineage](docs/dbt_lineage.png)
+
+## 12) Decisoes tecnicas
+
+- A camada `raw` e carregada como `TEXT` para simplificar ingestao e tolerar variacoes de entrada.
+- A tipagem e padronizacao ficam concentradas no `staging` (dbt).
+- `orchestration/dagster_project/definitions.py` executa Python e dbt como etapas explicitamente separadas.
+- `marts` contem tabelas prontas para consumo analitico.
+
+## 13) Troubleshooting rapido
+
+1. Erro de conexao no PostgreSQL
+- Confirme `docker compose ps`
+- Verifique se a porta `5432` esta livre
+- Revise credenciais do `.env`
+
+2. Script local nao encontra banco
+- Se estiver rodando fora do Docker, use `POSTGRES_HOST=localhost`
+- Se estiver rodando dentro do container Dagster, use `POSTGRES_HOST=postgres`
+
+3. Falha no dbt por `profiles.yml`
+- Rode dbt no diretorio `dbt_ecommerce/ecommerce`
+- Confirme `--profiles-dir .`
+
+4. Metabase sem tabelas
+- Garanta que `dbt run` terminou com sucesso
+- Confira se as tabelas foram criadas no schema `marts`
+
+## 14) Roteiro de estudo sugerido
+
+1. Rode o pipeline completo no Dagster.
+2. Abra o dbt Docs e navegue na linhagem de `raw` ate `marts`.
+3. Leia os modelos SQL em `models/staging` e `models/marts`.
+4. Crie uma nova metrica no dbt (ex.: ticket medio por categoria).
+5. Exponha a metrica em um dashboard no Metabase.
+
+## 15) Proximos passos tecnicos
+
+- Adicionar testes de relacionamento (chaves estrangeiras) no dbt
+- Implementar CI para `dbt test` e validacao de SQL
+- Evoluir ingestao para `COPY` no PostgreSQL para maior performance
