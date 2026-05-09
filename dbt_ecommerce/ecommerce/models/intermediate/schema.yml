@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: int_orders_enriched
+    description: "Camada intermediaria que enriquece pedidos com cliente e pagamento."
+    columns:
+      - name: order_id
+        description: "Identificador unico do pedido."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Identificador do cliente dono do pedido."
+        tests:
+          - not_null
+
+      - name: order_status
+        description: "Status do pedido."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['completed', 'cancelled', 'pending']
+
+      - name: payment_status
+        description: "Status do pagamento associado ao pedido."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['paid', 'failed', 'refunded']

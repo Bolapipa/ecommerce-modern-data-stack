@@ -1,0 +1,99 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Dimensao final de clientes para analise."
+    columns:
+      - name: customer_id
+        description: "Identificador unico do cliente."
+        tests:
+          - not_null
+          - unique
+
+      - name: email
+        description: "Email do cliente em minusculo."
+        tests:
+          - not_null
+
+  - name: dim_products
+    description: "Dimensao final de produtos para analise."
+    columns:
+      - name: product_id
+        description: "Identificador unico do produto."
+        tests:
+          - not_null
+          - unique
+
+      - name: category
+        description: "Categoria do produto."
+        tests:
+          - not_null
+
+  - name: fact_orders
+    description: "Fato de pedidos com status e informacoes de pagamento."
+    columns:
+      - name: order_id
+        description: "Identificador unico do pedido."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Chave do cliente dono do pedido."
+        tests:
+          - not_null
+
+      - name: order_status
+        description: "Status do pedido."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['completed', 'cancelled', 'pending']
+
+  - name: fact_order_items
+    description: "Fato de itens dos pedidos para metricas de venda."
+    columns:
+      - name: order_item_id
+        description: "Identificador unico do item do pedido."
+        tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: "Chave do pedido."
+        tests:
+          - not_null
+
+      - name: product_id
+        description: "Chave do produto."
+        tests:
+          - not_null
+
+      - name: total_item_amount
+        description: "Valor total do item (quantidade x preco unitario)."
+        tests:
+          - not_null
+
+  - name: sales_by_category
+    description: "Resumo agregado de vendas por categoria de produto."
+    columns:
+      - name: category
+        description: "Categoria do produto."
+        tests:
+          - not_null
+          - unique
+
+      - name: total_revenue
+        description: "Receita total por categoria."
+        tests:
+          - not_null
+
+      - name: total_quantity_sold
+        description: "Quantidade total vendida por categoria."
+        tests:
+          - not_null
+
+      - name: total_orders
+        description: "Quantidade de pedidos distintos por categoria."
+        tests:
+          - not_null

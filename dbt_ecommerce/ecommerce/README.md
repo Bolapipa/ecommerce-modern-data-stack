@@ -1,15 +1,30 @@
-Welcome to your new dbt project!
+# dbt Ecommerce Project
 
-### Using the starter project
+Projeto dbt da stack `ecommerce-modern-data-stack`.
 
-Try running the following commands:
-- dbt run
-- dbt test
+## Estrutura de camadas
 
+- `staging`: limpeza e tipagem dos dados raw
+- `intermediate`: joins e enriquecimentos
+- `marts`: tabelas finais para analise
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+## Comandos uteis
+
+Rodar dentro deste diretorio (`dbt_ecommerce/ecommerce`):
+
+```bash
+dbt debug --profiles-dir .
+dbt run --profiles-dir .
+dbt test --profiles-dir .
+```
+
+## Documentacao
+
+```bash
+dbt docs generate --profiles-dir .
+dbt docs serve --port 8081 --profiles-dir .
+```
+
+## Dependencia de ambiente
+
+As credenciais do PostgreSQL sao lidas via variaveis de ambiente no `profiles.yml`.
