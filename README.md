@@ -34,3 +34,40 @@ Python → PostgreSQL Raw → dbt Staging → dbt Intermediate → dbt Marts →
 - Data Visualization
 - Containerization
 - CI/CD
+
+## Project Screenshots
+
+### Metabase Dashboard
+
+The dashboard was built using the final marts created by dbt.
+
+It includes:
+- Total revenue
+- Orders by status
+- Revenue by product category
+
+![Metabase Dashboard](dashboards/metabase/screenshots/dashboard_ecommerce.png)
+
+---
+
+### dbt Lineage
+
+The dbt documentation shows the data lineage from raw sources to staging, intermediate and marts models.
+
+![dbt Lineage](docs/dbt_lineage.png)
+
+---
+
+### Dagster Pipeline
+
+Dagster orchestrates the full data pipeline, running data generation, raw ingestion, dbt transformations and dbt tests.
+
+![Dagster Pipeline Success](docs/dagster_pipeline_success.png)
+
+---
+
+### Dagster Asset Lineage
+
+The Dagster asset lineage shows the dependency flow between each pipeline step.
+
+![Dagster Asset Lineage](docs/dagster_asset_lineage.png)
