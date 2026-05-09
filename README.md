@@ -158,13 +158,21 @@ Abra `http://localhost:8081`.
 3. Explore tabelas no schema `marts`
 4. Monte perguntas e dashboards
 
-Screenshot de exemplo: `dashboards/metabase/screenshots/dashboard_ecommerce.png` (se aplicavel no seu ambiente)
+![Metabase dashboard](dashboards/metabase/screenshots/dashboard_ecommerce.png)
 
 ## 11) Evidencias visuais ja presentes no projeto
 
-- [Dagster pipeline sucesso](docs/dagster_pipeline_success.png)
-- [Dagster lineage](docs/dagster_asset_lineage.png)
-- [dbt lineage](docs/dbt_lineage.png)
+### Dagster pipeline (execucao com sucesso)
+
+![Dagster pipeline sucesso](docs/dagster_pipeline_success.png)
+
+### Dagster asset lineage
+
+![Dagster lineage](docs/dagster_asset_lineage.png)
+
+### dbt lineage
+
+![dbt lineage](docs/dbt_lineage.png)
 
 ## 12) Decisoes tecnicas
 
