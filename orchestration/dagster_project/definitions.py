@@ -13,7 +13,9 @@ Neste projeto, o fluxo será:
 4. dbt_test
 """
 
+import os
 import subprocess
+from datetime import datetime
 
 from dagster import Definitions, asset
 
@@ -100,6 +102,38 @@ def dbt_test() -> None:
         check=True,
     )
 
+@asset(deps=[dbt_test])
+def pipeline_summary() -> None:
+    """
+    Cria um arquivo simples com o resumo da execução do pipeline.
+
+    Este asset serve para demonstrar como criar uma nova etapa no Dagster.
+
+    Saída esperada:
+    docs/pipeline_summary.txt
+    """
+
+    os.makedirs("docs", exist_ok=True)
+
+    execution_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    summary_text = f"""
+Pipeline executado com sucesso.
+
+Etapas executadas:
+1. Geração de dados fake
+2. Carga raw no PostgreSQL
+3. Transformações dbt
+4. Testes dbt
+5. Geração deste resumo
+
+Data/hora da execução: {execution_time}
+"""
+
+    with open("docs/pipeline_summary.txt", "w", encoding="utf-8") as file:
+        file.write(summary_text.strip())
+
+    print("Resumo do pipeline criado em docs/pipeline_summary.txt")
 
 defs = Definitions(
     assets=[
@@ -107,5 +141,8 @@ defs = Definitions(
         load_raw_data,
         dbt_run,
         dbt_test,
+        pipeline_summary,
     ]
 )
+
+

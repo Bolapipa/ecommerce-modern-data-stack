@@ -1,0 +1,10 @@
+Pipeline executado com sucesso.
+
+Etapas executadas:
+1. Geração de dados fake
+2. Carga raw no PostgreSQL
+3. Transformações dbt
+4. Testes dbt
+5. Geração deste resumo
+
+Data/hora da execução: 2026-05-09 22:11:20
