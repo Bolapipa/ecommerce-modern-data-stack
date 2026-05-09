@@ -27,3 +27,9 @@ Thumbs.db
 
 # Docker
 *.log
+
+# Generated raw data
+data/raw/*.csv
+
+# dbt local user config
+dbt_ecommerce/ecommerce/.user.yml
