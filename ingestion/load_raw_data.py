@@ -31,7 +31,7 @@ RAW_DATA_PATH = "data/raw"
 # Configurações de conexão com o PostgreSQL.
 # Aqui usamos localhost porque este script está rodando no seu PC,
 # fora do container Docker.
-POSTGRES_HOST = os.getenv("POSTGRES_HOST_LOCAL", "localhost")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "ecommerce")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "ecommerce_user")
@@ -81,36 +81,65 @@ def create_raw_schema(connection) -> None:
 
 def create_table_from_dataframe(connection, df: pd.DataFrame, table_name: str) -> None:
     """
-    Cria uma tabela no PostgreSQL baseada nas colunas do DataFrame.
+    Cria ou limpa uma tabela raw no PostgreSQL.
 
-    Para manter a Bronze/Raw simples, todas as colunas serão criadas como TEXT.
+    Se a tabela ainda não existir:
+    - cria a tabela com todas as colunas como TEXT.
 
-    Por quê?
-    - Evita erro de tipagem na carga bruta.
-    - Deixa a responsabilidade de conversão para a camada staging/dbt.
-    - Mantém a ingestão simples e robusta.
+    Se a tabela já existir:
+    - limpa os dados com TRUNCATE TABLE.
+    - não apaga a tabela, porque ela pode ter views do dbt dependendo dela.
+
+    Por que não usamos DROP TABLE?
+    - Porque as views staging do dbt dependem das tabelas raw.
+    - Se tentarmos apagar a tabela raw, o PostgreSQL bloqueia a operação.
     """
 
-    columns_sql = []
-
-    for column_name in df.columns:
-        columns_sql.append(
-            sql.SQL("{} TEXT").format(sql.Identifier(column_name))
+    with connection.cursor() as cursor:
+        # Verifica se a tabela já existe no schema raw
+        cursor.execute(
+            """
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'raw'
+                  AND table_name = %s
+            );
+            """,
+            (table_name,),
         )
 
-    create_table_query = sql.SQL("""
-        DROP TABLE IF EXISTS raw.{table_name};
+        table_exists = cursor.fetchone()[0]
 
-        CREATE TABLE raw.{table_name} (
-            {columns}
-        );
-    """).format(
-        table_name=sql.Identifier(table_name),
-        columns=sql.SQL(", ").join(columns_sql),
-    )
+        if table_exists:
+            # Se a tabela já existe, apenas remove os dados antigos
+            truncate_query = sql.SQL("""
+                TRUNCATE TABLE raw.{table_name};
+            """).format(
+                table_name=sql.Identifier(table_name)
+            )
 
-    with connection.cursor() as cursor:
-        cursor.execute(create_table_query)
+            cursor.execute(truncate_query)
+
+        else:
+            # Se a tabela não existe, cria a estrutura com todas as colunas como TEXT
+            columns_sql = []
+
+            for column_name in df.columns:
+                columns_sql.append(
+                    sql.SQL("{} TEXT").format(sql.Identifier(column_name))
+                )
+
+            create_table_query = sql.SQL("""
+                CREATE TABLE raw.{table_name} (
+                    {columns}
+                );
+            """).format(
+                table_name=sql.Identifier(table_name),
+                columns=sql.SQL(", ").join(columns_sql),
+            )
+
+            cursor.execute(create_table_query)
 
     connection.commit()
 

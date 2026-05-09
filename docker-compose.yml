@@ -55,21 +55,20 @@ services:
   # Orquestrador do pipeline
   # Vai controlar a execução da ingestão e do dbt
   dagster:
-    image: python:3.11-slim
+    build:
+      context: .
+      dockerfile: orchestration/dagster_project/Dockerfile
+
     container_name: ecommerce_dagster
     restart: always
 
     working_dir: /app
 
-    # Mantém o container rodando por enquanto
-    # Depois vamos trocar isso pelo comando do Dagster
-    command: tail -f /dev/null
-
     env_file:
       - .env
 
     ports:
-      # Futuramente acessaremos o Dagster em http://localhost:3001
+      # Acessar o Dagster no navegador em http://localhost:3001
       - "3001:3000"
 
     volumes:
